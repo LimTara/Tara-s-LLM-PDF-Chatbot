@@ -5,6 +5,34 @@ import streamlit as st
 import cohere
 import fitz # An alias for the PyMuPDF library.
 
+def generate_idea(industry, temperature):
+    
+    prompt = f"""
+Generate a startup idea given the industry. Return the startup idea and without additional commentary.
+
+Industry: Workplace
+Startup Idea: A platform that generates slide deck contents automatically based on a given outline
+
+Industry: Home Decor
+Startup Idea: An app that calculates the best position of your indoor plants for your apartment
+
+Industry: Healthcare
+Startup Idea: A hearing aid for the elderly that automatically adjusts its levels and with a battery lasting a whole week
+
+Industry: Education
+Startup Idea: An online primary school that lets students mix and match their own curriculum based on their interests and goals
+
+Industry: {industry}
+Startup Idea:"""
+
+    # Call the Cohere Chat endpoint
+    client = cohere.Client(api_key=cohere_api_key)  # Create the client
+    response = client.chat(  # Use client instead of co
+            messages=[{"role": "user", "content": prompt}],
+            model="command-r-plus-08-2024")
+        
+    return response.message.content[0].text
+
 def pdf_to_documents(pdf_path):
     """
     Converts a PDF to a list of 'documents' which are chunks of a larger document that can be easily searched 
@@ -60,11 +88,11 @@ with st.sidebar:
     # st.write(f"Selected document: {selected_doc}")
 
 # Set the title of the Streamlit app
-st.title("💬 HKIS Bus Helper")
+st.title("💬 MovieBot")
 
 # Initialize the chat history with a greeting message
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "Chatbot", "text": "Hi! I'm the HKIS Bus Helper. Select your location from the dropdown then ask me where you'd like to go and I'll do my best to find a school bus that will get you there."}]
+    st.session_state["messages"] = [{"role": "Chatbot", "text": "Hi!"}]
 
 # Display the chat messages
 for msg in st.session_state.messages:
@@ -83,13 +111,7 @@ if prompt := st.chat_input():
     # Display the user message in the chat window
     st.chat_message("User").write(prompt)
 
-    preamble = """You are the Hong Kong International School Bus Helper bot. You help people understand the bus schedule.
-    When someone mentions a location you should refer to the document to see if there are buses that stop nearby.
-    Respond with advice about which buses will stop the closest to their destination, the name of the stop they 
-    should get off at and the name of the suburb that the stop is located in. 
-    Finish with brief instructions for how they can get from the stop to their destination.
-    Group the buses you recommend by the time they depart. If the document is about Tai Tam then group your recommendations by the following departure times: 3:15, 4:20 and 5pm. 
-    If the document is about repulse bay then state the departure time is 4pm.
+    preamble = """You are MovieBot. You recommend movies to people based on their preferences. Users will input their age through sliders as well as their genre preferences (eg: action, comedy, horror, etc), gender (eg: male, female), and type (eg: 3D, 2D, etc). Based on the individual's preferences, you will then generate a list of appropriate movies that suit their preferences.
     """
 
     # Send the user message and pdf text to the model and capture the response
